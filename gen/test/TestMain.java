@@ -11,7 +11,7 @@ import org.jivesoftware.smack.packet.Message;
  * To change this template use File | Settings | File Templates.
  */
 public class TestMain implements Runnable {
-    private Connection connection;
+    private XMPPConnection connection;
 
     public TestMain() {
         setConnection();
@@ -20,19 +20,23 @@ public class TestMain implements Runnable {
 
     void setConnection() {
         ConnectionConfiguration config = new ConnectionConfiguration("manibh.dnsd.me", 5222);
+        config.setCompressionEnabled(true);
+        config.setSASLAuthenticationEnabled(true);
         connection = new XMPPConnection(config);
         try {
             connection.connect();
-            connection.login("mani","mani");
+            connection.login("bahar","bahar");
         } catch (XMPPException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 
     void setChatManager() {
         // Assume we've created a Connection name "connection".
         ChatManager chatmanager = connection.getChatManager();
-        Chat newChat = chatmanager.createChat("bahar", new MessageListener() {
+        Chat newChat = chatmanager.createChat("mani", new MessageListener() {
             public void processMessage(Chat chat, Message message) {
                 System.out.println("Received message: " + message);
             }

@@ -4,13 +4,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import org.jivesoftware.smack.*;
+import org.jivesoftware.smack.filter.MessageTypeFilter;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Packet;
 
 
 public class MainActivity extends Activity {
@@ -77,46 +81,70 @@ public class MainActivity extends Activity {
         EditText editText = (EditText) findViewById(R.id.edit_message);
         String message = editText.getText().toString();
         intent.putExtra(SENT_MESSAGE, message);
-        sendMessageXMPP(message,"bahar");
-        sendMessagePacket("baher",message,Message.Type.chat);
+        sendMessageXMPP(message, "bahar@manis-macbook-pro.local");
+        sendMessagePacket("bahar@manis-macbook-pro.local", message, Message.Type.chat);
         //start target activity with using given intent
         this.startActivity(intent);
     }
 
-    void sendMessagePacket(String to,String message, Message.Type type){
+    void sendMessagePacket(String to, String message, Message.Type type) {
         XMPPConnection connection = getConnection();
         // Send chat msg to with msg type as (chat, normal, groupchat, headline, error)
         Message msg = new Message(to, type);
-        msg.setBody("How are you?");
+        msg.setBody(message);
         connection.sendPacket(msg);
+//        receiveMessage(connection);
     }
 
-    void sendMessageXMPP(String message,String targetUser) {
+    void sendMessageXMPP(String message, String targetUser) {
         // Create a connection to the jabber.org server.
-        ChatManager chatmanager = getConnection().getChatManager();
+        XMPPConnection connection = getConnection();
+        ChatManager chatmanager = connection.getChatManager();
         Chat newChat = chatmanager.createChat(targetUser, new MessageListener() {
             public void processMessage(Chat chat, Message message) {
-                System.out.println("Received message: " + message);
+                System.out.println("Received message: " + message.getBodies().toString());
+                System.out.println("dobare manam: " + message.getBody() + "chat: " + chat.toString()
+                        + "chat participant" + chat.getParticipant());
+
+                Log.d("DEBUG", message.getBody().toString());
             }
         });
 
         try {
             newChat.sendMessage(message);
             System.out.println("yohoo message sent");
+//            receiveMessage(connection);
         } catch (XMPPException e) {
             System.out.println("Error Delivering block");
-        } catch (Exception e){
-            System.out.println("----------Mani---------" + e.getMessage());
+            System.out.println("----------sendMessageXMPP---------" + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("----------sendMessageXMPP---------" + e.getMessage());
         }
 
+    }
+
+    protected void receiveMessage(XMPPConnection connection) {
+        PacketFilter filter = new MessageTypeFilter(Message.Type.chat);
+        connection.addPacketListener(new PacketListener() {
+            public void processPacket(Packet packet) {
+                Message message = (Message) packet;
+                String body = message.getBody();
+                String from = message.getFrom();
+                System.out.println(from + "--------------------------->" + body);
+            }
+        }, filter);
     }
 // Create a connection to the jabber.org server on a specific port.
 
     private XMPPConnection getConnection() {
+        XMPPConnection.DEBUG_ENABLED = true;
         ConnectionConfiguration config = new ConnectionConfiguration("manibh.dnsd.me", 5222);
         config.setCompressionEnabled(true);
         config.setSASLAuthenticationEnabled(true);
+        config.setSelfSignedCertificateEnabled(true);
+
         XMPPConnection connection = new XMPPConnection(config);
+
         try {
 
             /*
@@ -140,10 +168,10 @@ public class MainActivity extends Activity {
         } catch (XMPPException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             System.out.println(e.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
 //            System.out.println("--------------------MANI-----------------------");
-            System.out.println("--------------------MANI-----------------------" + "\n" +e.getMessage());
+            System.out.println("--------------------getConnection-----------------------" + "\n" + e.getMessage());
         }
         return connection;
     }
