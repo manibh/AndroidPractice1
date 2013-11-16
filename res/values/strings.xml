@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_name">Android Practice1</string>
+    <string name="result_name">Practice1 Results</string>
+    <string name="mainEditText">Text to send</string>
+    <string name="mainButtonSend">Send</string>
+    <string name="app_name">Practice1</string>
+    <string name="action_search">Search</string>
+    <string name="action_settings_title">settings</string>
+    <string name="setting_fontsize">Font size</string>
+    <string name="setting_set_button">Set</string>
+    <string name="setting_fontcolor">color</string>
+    <string name="setting_label">Settings</string>
+</resources>
