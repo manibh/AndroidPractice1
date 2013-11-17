@@ -16,11 +16,14 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 
+import java.util.HashMap;
+
 
 public class MainActivity extends Activity {
 
-    public static final String SENT_MESSAGE = "com.mani.android.Practice1.MainActivity.message";
-
+    protected static final String SENT_MESSAGE = "com.mani.android.Practice1.MainActivity.message";
+    private XmppClient xmppClient;
+    private HashMap <String,String>map;
     /**
      * Called when the activity is first created.
      */
@@ -28,6 +31,7 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        map=new HashMap<String, String>();
     }
 
     /*
@@ -81,99 +85,17 @@ public class MainActivity extends Activity {
         EditText editText = (EditText) findViewById(R.id.edit_message);
         String message = editText.getText().toString();
         intent.putExtra(SENT_MESSAGE, message);
-        sendMessageXMPP(message, "bahar@manis-macbook-pro.local");
-        sendMessagePacket("bahar@manis-macbook-pro.local", message, Message.Type.chat);
+
+        map.put(XmppClient.SERVER_ADDRESS,"manibh.dnsd.me");
+        map.put(XmppClient.SERVER_PORT,"5222");
+        map.put(XmppClient.USERNAME,"mani");
+        map.put(XmppClient.PASSWORD,"mani");
+        xmppClient = new XmppClient(map);
+        xmppClient.sendMessageXMPP(message, "bahar@manis-macbook-pro.local");
+        xmppClient.sendMessagePacket("bahar@manis-macbook-pro.local", message, Message.Type.chat);
+
         //start target activity with using given intent
         this.startActivity(intent);
-    }
-
-    void sendMessagePacket(String to, String message, Message.Type type) {
-        XMPPConnection connection = getConnection();
-        // Send chat msg to with msg type as (chat, normal, groupchat, headline, error)
-        Message msg = new Message(to, type);
-        msg.setBody(message);
-        connection.sendPacket(msg);
-//        receiveMessage(connection);
-    }
-
-    void sendMessageXMPP(String message, String targetUser) {
-        // Create a connection to the jabber.org server.
-        XMPPConnection connection = getConnection();
-        ChatManager chatmanager = connection.getChatManager();
-        Chat newChat = chatmanager.createChat(targetUser, new MessageListener() {
-            public void processMessage(Chat chat, Message message) {
-                System.out.println("Received message: " + message.getBodies().toString());
-                System.out.println("dobare manam: " + message.getBody() + "chat: " + chat.toString()
-                        + "chat participant" + chat.getParticipant());
-
-                Log.d("DEBUG", message.getBody().toString());
-            }
-        });
-
-        try {
-            newChat.sendMessage(message);
-            System.out.println("yohoo message sent");
-//            receiveMessage(connection);
-        } catch (XMPPException e) {
-            System.out.println("Error Delivering block");
-            System.out.println("----------sendMessageXMPP---------" + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("----------sendMessageXMPP---------" + e.getMessage());
-        }
-
-    }
-
-    protected void receiveMessage(XMPPConnection connection) {
-        PacketFilter filter = new MessageTypeFilter(Message.Type.chat);
-        connection.addPacketListener(new PacketListener() {
-            public void processPacket(Packet packet) {
-                Message message = (Message) packet;
-                String body = message.getBody();
-                String from = message.getFrom();
-                System.out.println(from + "--------------------------->" + body);
-            }
-        }, filter);
-    }
-// Create a connection to the jabber.org server on a specific port.
-
-    private XMPPConnection getConnection() {
-        XMPPConnection.DEBUG_ENABLED = true;
-        ConnectionConfiguration config = new ConnectionConfiguration("manibh.dnsd.me", 5222);
-        config.setCompressionEnabled(true);
-        config.setSASLAuthenticationEnabled(true);
-        config.setSelfSignedCertificateEnabled(true);
-
-        XMPPConnection connection = new XMPPConnection(config);
-
-        try {
-
-            /*
-            * @MBH
-            * StrictMode.ThreadPolicy was introduced since API Level 9 and the default thread policy had been
-            * changed since API Level 11, which in short, does not allow network operation (include HttpClient
-             * and HttpUrlConnection) get executed on UI thread. if you do this, you get NetworkOnMainThreadException.
-             *
-             * also add following to manifest
-             *  <uses-permission android:name="android.permission.INTERNET" />
-             *
-             *  ---->should do following on separate thread adding that policy here is bad practice
-             *
-            * */
-            if (android.os.Build.VERSION.SDK_INT > 9) {
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-            }
-            connection.connect();
-            connection.login("mani", "mani");
-        } catch (XMPPException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-//            System.out.println("--------------------MANI-----------------------");
-            System.out.println("--------------------getConnection-----------------------" + "\n" + e.getMessage());
-        }
-        return connection;
     }
 
 

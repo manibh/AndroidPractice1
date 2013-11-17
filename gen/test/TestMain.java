@@ -17,7 +17,9 @@ public class TestMain implements Runnable {
         setConnection();
         setChatManager();
     }
-
+    /*
+    only works with Smack.jars
+     */
     void setConnection() {
         ConnectionConfiguration config = new ConnectionConfiguration("manibh.dnsd.me", 5222);
         config.setCompressionEnabled(true);
