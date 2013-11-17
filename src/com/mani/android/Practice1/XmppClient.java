@@ -8,7 +8,6 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import java.util.HashMap;
-import java.util.Properties;
 
 
 /**
