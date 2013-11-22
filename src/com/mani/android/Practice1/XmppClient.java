@@ -2,6 +2,7 @@ package com.mani.android.Practice1;
 
 import android.os.StrictMode;
 import android.util.Log;
+import android.widget.EditText;
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.filter.PacketFilter;
@@ -37,19 +38,11 @@ public class XmppClient {
 //        receiveMessage(connection);
     }
 
-    protected void sendMessageXMPP(String message, String targetUser) {
+    protected void sendMessageXMPP(String message, String targetUser, EditText editText) {
         // Create a connection to the jabber.org server.
 //        XMPPConnection connection = getConnection();
         ChatManager chatmanager = xmppConnection.getChatManager();
-        Chat newChat = chatmanager.createChat(targetUser, new MessageListener() {
-            public void processMessage(Chat chat, Message message) {
-                System.out.println("Received message: " + message.getBodies().toString());
-                System.out.println("dobare manam: " + message.getBody() + "chat: " + chat.toString()
-                        + "chat participant" + chat.getParticipant());
-
-                Log.d("DEBUG", message.getBody().toString());
-            }
-        });
+        Chat newChat = chatmanager.createChat(targetUser, new MessageListener(editText));
 
         try {
             newChat.sendMessage(message);
@@ -120,5 +113,25 @@ public class XmppClient {
             System.out.println("--------------------getConnection-----------------------" + "\n" + e.getMessage());
         }
         return connection;
+    }
+}
+class MessageListener implements org.jivesoftware.smack.MessageListener{
+
+    private EditText editText;
+    public MessageListener(EditText editText){
+        this.editText=editText;
+    }
+
+    @Override
+    public void processMessage(Chat chat, Message message) {
+        //To change body of implemented methods use File | Settings | File Templates.
+        String response=message.getBodies().toString();
+        String from=message.getFrom();
+        editText.append("/n"+from+":"+response);
+        System.out.println("Received message: " + message.getBodies().toString());
+        System.out.println("dobare manam: " + message.getBody() + "chat: " + chat.toString()
+                + "chat participant" + chat.getParticipant());
+
+        Log.d("DEBUG", message.getBody().toString());
     }
 }

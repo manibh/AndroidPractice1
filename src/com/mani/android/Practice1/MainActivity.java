@@ -17,7 +17,7 @@ public class MainActivity extends Activity {
 
     protected static final String SENT_MESSAGE = "com.mani.android.Practice1.MainActivity.message";
     private XmppClient xmppClient;
-    private HashMap <String,String>map;
+    protected static HashMap <String,String>map;
     /**
      * Called when the activity is first created.
      */
@@ -75,21 +75,19 @@ public class MainActivity extends Activity {
     (reflection) to find this method with its given name.
      */
     public void sendButtonClicked(View view) {
-        Intent intent = new Intent(this, com.mani.android.Practice1.ResultActivity.class);
         EditText editText = (EditText) findViewById(R.id.edit_message);
         String message = editText.getText().toString();
-        intent.putExtra(SENT_MESSAGE, message);
-
         map.put(XmppClient.SERVER_ADDRESS,"manibh.dnsd.me");
         map.put(XmppClient.SERVER_PORT,"5222");
         map.put(XmppClient.USERNAME,"mani");
         map.put(XmppClient.PASSWORD,"mani");
-        xmppClient = new XmppClient(map);
-        xmppClient.sendMessageXMPP(message, "bahar@manis-macbook-pro.local");
+        xmppClient=new XmppClient(map);
+        xmppClient.sendMessageXMPP(message, "bahar@manis-macbook-pro.local",editText);
         xmppClient.sendMessagePacket("bahar@manis-macbook-pro.local", message, Message.Type.chat);
-
         //start target activity with using given intent
-        this.startActivity(intent);
+//        Intent intent = new Intent(this, com.mani.android.Practice1.ResultActivity.class);
+//        intent.putExtra(SENT_MESSAGE, message);
+//        this.startActivity(intent);
     }
 
 
