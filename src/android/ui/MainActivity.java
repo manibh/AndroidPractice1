@@ -1,23 +1,27 @@
-package com.mani.android.Practice1;
+package android.ui;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.service.XmppClient;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import org.jivesoftware.smack.packet.Message;
+import android.widget.TextView;
+import com.mani.android.Practice1.R;
 
 import java.util.HashMap;
 
 
 public class MainActivity extends Activity {
 
-    protected static final String SENT_MESSAGE = "com.mani.android.Practice1.MainActivity.message";
+    protected static final String SENT_MESSAGE = "android.ui.MainActivity.message";
     private XmppClient xmppClient;
     protected static HashMap <String,String>map;
+    private static String chatLogText=new String();
+    protected static TextView chatLog;
     /**
      * Called when the activity is first created.
      */
@@ -26,6 +30,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         map=new HashMap<String, String>();
+        chatLog= (TextView)findViewById(R.id.main_chatlog);
     }
 
     /*
@@ -77,23 +82,27 @@ public class MainActivity extends Activity {
     public void sendButtonClicked(View view) {
         EditText editText = (EditText) findViewById(R.id.edit_message);
         String message = editText.getText().toString();
-        map.put(XmppClient.SERVER_ADDRESS,"manibh.dnsd.me");
-        map.put(XmppClient.SERVER_PORT,"5222");
-        map.put(XmppClient.USERNAME,"mani");
-        map.put(XmppClient.PASSWORD,"mani");
-        xmppClient=new XmppClient(map);
-        xmppClient.sendMessageXMPP(message, "bahar@manis-macbook-pro.local",editText);
-        xmppClient.sendMessagePacket("bahar@manis-macbook-pro.local", message, Message.Type.chat);
+        xmppClient=new XmppClient();
+        xmppClient.sendMessageXMPP(message, "bahar@manis-macbook-pro.local", this);
+//        xmppClient.sendMessagePacket("bahar@manis-macbook-pro.local", message, Message.Type.chat);
+        setChatLog(this.map.get(XmppClient.USERNAME),message);
         //start target activity with using given intent
-//        Intent intent = new Intent(this, com.mani.android.Practice1.ResultActivity.class);
+//        Intent intent = new Intent(this, android.ui.ResultActivity.class);
 //        intent.putExtra(SENT_MESSAGE, message);
 //        this.startActivity(intent);
     }
 
 
     void openSettings() {
-        Intent intent = new Intent(this, com.mani.android.Practice1.Setting.class);
+        Intent intent = new Intent(this, Setting.class);
         startActivity(intent);
+    }
+
+
+    public static void setChatLog(String user,String chat) {
+        String temp=chatLogText + user + ":"+chat +"\n";
+        System.out.println(temp);
+        chatLog.append(chatLogText + user + ":"+chat +"\n");
     }
 
 }

@@ -1,14 +1,27 @@
-package com.mani.android.Practice1;
+package android.service;
 
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.AssetManager;
+import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
-import android.widget.EditText;
+import android.ui.MainActivity;
+import android.util.PropertiesManager;
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.util.Base64;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.Properties;
 
 
 /**
@@ -18,18 +31,30 @@ import java.util.HashMap;
  * Time: 10:59 AM
  * To change this template use File | Settings | File Templates.
  */
-public class XmppClient {
+//it must extends service
+public class XmppClient extends Service{
     private XMPPConnection xmppConnection;
-    protected static final String SERVER_ADDRESS="address";
-    protected static final String SERVER_PORT="port";
-    protected static final String USERNAME="username";
-    protected static final String PASSWORD="password";
+    public static final String SERVER_ADDRESS="address";
+    public static final String SERVER_PORT="port";
+    public static final String USERNAME="username";
+    public static final String PASSWORD="password";
+    public static final String PROPERTIES_FILE="xmpp-properties.properties";
 
-    public XmppClient(HashMap <String, String>map){
-        xmppConnection=getConnection(map);
+
+    public XmppClient(){
+        init();
     }
 
-    void sendMessagePacket(String to, String message, Message.Type type) {
+    public void init(){
+        Properties properties=new Properties();
+        properties.put(XmppClient.SERVER_ADDRESS,"manibh.dnsd.me");
+        properties.put(XmppClient.SERVER_PORT,"5222");
+        properties.put(XmppClient.USERNAME,"mani");
+        properties.put(XmppClient.PASSWORD,"mani");
+        PropertiesManager.storeProperties(this,properties,XmppClient.PROPERTIES_FILE,"xmpp credentials");
+        xmppConnection=getConnection();
+    }
+    public void sendMessagePacket(String to, String message, Message.Type type) {
 //        XMPPConnection connection = getConnection();
         // Send chat msg to with msg type as (chat, normal, groupchat, headline, error)
         Message msg = new Message(to, type);
@@ -38,11 +63,11 @@ public class XmppClient {
 //        receiveMessage(connection);
     }
 
-    protected void sendMessageXMPP(String message, String targetUser, EditText editText) {
+    public void sendMessageXMPP(String message, String targetUser, MainActivity mainActivity) {
         // Create a connection to the jabber.org server.
 //        XMPPConnection connection = getConnection();
         ChatManager chatmanager = xmppConnection.getChatManager();
-        Chat newChat = chatmanager.createChat(targetUser, new MessageListener(editText));
+        Chat newChat = chatmanager.createChat(targetUser, new MessageListener(mainActivity));
 
         try {
             newChat.sendMessage(message);
@@ -69,12 +94,12 @@ public class XmppClient {
         }, filter);
     }
 
-    private XMPPConnection getConnection(HashMap <String,String>properties) {
-
-        String address= properties.get(SERVER_ADDRESS);
-        int port=Integer.valueOf(properties.get(SERVER_PORT));
-        String username=properties.get(USERNAME);
-        String password=properties.get(PASSWORD);
+    private XMPPConnection getConnection() {
+        Properties properties=PropertiesManager.loadProperties(this,PROPERTIES_FILE);
+        String address= (String) properties.get(SERVER_ADDRESS);
+        int port=(Integer) properties.get(SERVER_PORT);
+        String username= (String) properties.get(USERNAME);
+        String password= (String) properties.get(PASSWORD);
 
         XMPPConnection.DEBUG_ENABLED = true;
         ConnectionConfiguration config = new ConnectionConfiguration(address,port);
@@ -114,24 +139,33 @@ public class XmppClient {
         }
         return connection;
     }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }
+
 class MessageListener implements org.jivesoftware.smack.MessageListener{
 
-    private EditText editText;
-    public MessageListener(EditText editText){
-        this.editText=editText;
+    MainActivity mainActivity;
+    public MessageListener(MainActivity mainActivity){
+        this.mainActivity=mainActivity;
     }
 
     @Override
     public void processMessage(Chat chat, Message message) {
-        //To change body of implemented methods use File | Settings | File Templates.
-        String response=message.getBodies().toString();
-        String from=message.getFrom();
-        editText.append("/n"+from+":"+response);
-        System.out.println("Received message: " + message.getBodies().toString());
-        System.out.println("dobare manam: " + message.getBody() + "chat: " + chat.toString()
-                + "chat participant" + chat.getParticipant());
+        String user=chat.getParticipant();
+        String msg=message.getBody().toString();
 
+        mainActivity.setChatLog(user, msg);
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //To change body of implemented methods use File | Settings | File Templates.
+                System.out.println("test");
+            }
+        });
         Log.d("DEBUG", message.getBody().toString());
     }
 }

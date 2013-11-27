@@ -4,16 +4,21 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
         >
+    <TextView android:id="@+id/main_chatlog"
+              android:layout_width="fill_parent"
+              android:layout_height="0dp"
+              android:layout_weight="1"
+              android:scrollbars="horizontal"/>
     <EditText
             android:id="@+id/edit_message"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_width="fill_parent"
             android:hint="@string/mainEditText"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:editable="true"
 
      />
-    <Button android:layout_width="wrap_content"
+    <Button android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/mainButtonSend"
             android:onClick="sendButtonClicked"/>

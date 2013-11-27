@@ -1,10 +1,11 @@
-package com.mani.android.Practice1;
+package android.ui;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+import com.mani.android.Practice1.R;
 
 /**
  * Created with IntelliJ IDEA.
